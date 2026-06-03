@@ -32,6 +32,7 @@
                             gold: '#FFD700',
                             white: '#ffffff',
                             gray: '#a3a3a3',
+                            lcarnitina: '#06b6d4',
                         }
                     },
                     fontFamily: {
@@ -305,6 +306,59 @@
             box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
         }
         
+        /* NUEVO: Estilos para opción L-carnitina */
+        .lcarnitina-toggle {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 44px;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            flex-shrink: 0;
+        }
+        .lcarnitina-toggle::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: #666;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+        .lcarnitina-toggle:checked {
+            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+        }
+        .lcarnitina-toggle:checked::after {
+            left: 22px;
+            background: white;
+        }
+        .lcarnitina-section {
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+        .lcarnitina-section.lcarnitina-active {
+            border-color: rgba(6, 182, 212, 0.4);
+            background: rgba(6, 182, 212, 0.05);
+        }
+        .lcarnitina-badge {
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.2) 0%, rgba(6, 182, 212, 0.1) 100%);
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            color: #06b6d4;
+        }
+        .lcarnitina-price-highlight {
+            background: linear-gradient(90deg, #06b6d4, #22d3ee, #06b6d4);
+            background-size: 200% 100%;
+            animation: shimmer 2s linear infinite;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
         /* Scrollbar personalizado */
         .custom-scrollbar::-webkit-scrollbar {
             width: 6px;
@@ -347,6 +401,17 @@
             animation: wave 1s ease-in-out infinite;
             transform-origin: 70% 70%;
         }
+
+        /* Precio total animado */
+        .total-price-animated {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* Alerta de pago anticipado */
+        .prepay-alert {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.05) 100%);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col font-sans selection:bg-infit-gold selection:text-black">
@@ -384,6 +449,14 @@
                         <label class="block text-gray-500">Reto 3 Meses</label>
                         <input type="number" id="edit-price-reto" class="input-field w-full p-2 rounded" oninput="updateContent()">
                     </div>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-700 pt-4 mt-4">
+                <h4 class="text-white font-bold mb-2">L-Carnitina (USD)</h4>
+                <div>
+                    <label class="block text-gray-500">Precio L-Carnitina</label>
+                    <input type="number" id="edit-price-lcarnitina" class="input-field w-full p-2 rounded" oninput="updateContent()">
                 </div>
             </div>
 
@@ -454,10 +527,10 @@
     </header>
 
     <!-- Pricing Plans Section -->
-    <main class="max-w-4xl mx-auto px-4 pb-24 flex flex-col md:flex-row justify-center items-stretch gap-6 md:gap-8">
+    <main class="max-w-5xl mx-auto px-4 pb-24 flex flex-col md:flex-row justify-center items-stretch gap-6 md:gap-8">
         
         <!-- Plan Nutrición Mensual -->
-        <div class="plan-card glass-panel rounded-2xl p-6 md:p-8 relative group hover:bg-white/5 transition-all duration-300 w-full md:w-[340px]">
+        <div class="plan-card glass-panel rounded-2xl p-6 md:p-8 relative group hover:bg-white/5 transition-all duration-300 w-full md:w-[370px]">
             <div class="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-infit-dark border border-white/10 p-3 rounded-full shadow-[0_0_15px_rgba(255,255,255,0.05)]">
                 <i class="fas fa-dumbbell text-2xl text-infit-gold"></i>
             </div>
@@ -470,7 +543,7 @@
             <button onclick="playVideo('nutri')" class="w-full mb-4 py-2 bg-black hover:bg-infit-gold/10 rounded text-xs text-infit-gold border border-infit-gold/30 transition-all flex items-center justify-center gap-2">
                 <i class="fas fa-play-circle text-sm"></i> Ver Preview
             </button>
-            <ul class="space-y-3 text-sm text-gray-400 mb-8">
+            <ul class="space-y-3 text-sm text-gray-400 mb-6">
                 <li class="flex items-start gap-3">
                     <div class="check-icon p-1 rounded text-infit-gold mt-0.5"><i class="fas fa-check text-xs"></i></div>
                     <span>Plan 100% personalizado</span>
@@ -488,13 +561,55 @@
                     <span>Soporte por WhatsApp</span>
                 </li>
             </ul>
+
+            <!-- SECCIÓN L-CARNITINA - Plan Mensual USA -->
+            <div id="lcarnitina-nutri-section" class="lcarnitina-section border border-gray-700 rounded-xl p-4 mb-6">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                        <span class="lcarnitina-badge text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Opcional</span>
+                        <span class="text-white text-sm font-bold">💊 L-Carnitina</span>
+                    </div>
+                    <input type="checkbox" id="lcarnitina-nutri-toggle" class="lcarnitina-toggle" onchange="toggleLcarnitina('nutri')">
+                </div>
+                <div id="lcarnitina-nutri-details" class="hidden mt-3 space-y-2 animate-bounce-in">
+                    <div class="flex items-center gap-2 text-xs text-gray-400">
+                        <i class="fas fa-capsules text-infit-lcarnitina"></i>
+                        <span>2 Frascos - Presentación en pastillas</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs">
+                        <span class="lcarnitina-price-highlight font-bold text-lg">$<span id="lcarnitina-nutri-price">90</span></span>
+                        <span class="text-gray-500">USD (envío incluido)</span>
+                    </div>
+                    <div class="bg-cyan-900/10 border border-cyan-500/10 p-2 rounded-lg space-y-1">
+                        <div class="flex items-start gap-2 text-[10px] text-cyan-300/70">
+                            <i class="fas fa-truck mt-0.5"></i>
+                            <span>Envío incluido desde México hasta tu domicilio en USA.</span>
+                        </div>
+                        <div class="flex items-start gap-2 text-[10px] text-yellow-300/70">
+                            <i class="fas fa-bolt mt-0.5"></i>
+                            <span>La L-Carnitina potencia la quema de grasa y mejora tu rendimiento físico.</span>
+                        </div>
+                    </div>
+                    <div class="prepay-alert p-2 rounded-lg mt-2">
+                        <div class="flex items-start gap-2 text-[10px] text-red-300/80">
+                            <i class="fas fa-exclamation-triangle mt-0.5"></i>
+                            <span><strong>Pago anticipado requerido</strong> para procesar el envío de la L-Carnitina desde México.</span>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-[9px] text-gray-600 mt-2 flex items-center gap-1">
+                    <i class="fas fa-info-circle text-infit-lcarnitina/50"></i>
+                    Complemento para potenciar resultados. Solo se vende junto con un plan.
+                </p>
+            </div>
+
             <button onclick="selectPlan('Nutrición Mensual')" class="w-full py-3 rounded-lg btn-secondary text-sm font-bold uppercase tracking-wider active:scale-95 transition-transform">
                 Elegir Nutrición
             </button>
         </div>
 
         <!-- PLAN RETO 3 MESES (DESTACADO) -->
-        <div class="plan-card featured-card rounded-2xl p-6 md:p-8 w-full md:w-[380px]">
+        <div class="plan-card featured-card rounded-2xl p-6 md:p-8 w-full md:w-[410px]">
             <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 shimmer-badge font-bold px-5 py-1.5 rounded-full text-xs uppercase tracking-widest shadow-[0_0_20px_rgba(255,215,0,0.3)]">
                 ⭐ Mejor Valor 🇺🇸
             </div>
@@ -514,7 +629,7 @@
             <button onclick="playVideo('reto')" class="w-full mb-4 py-2 bg-infit-gold/20 hover:bg-infit-gold/30 rounded text-xs text-infit-gold border border-infit-gold/30 transition-all flex items-center justify-center gap-2">
                 <i class="fas fa-play-circle text-sm"></i> Ver Preview
             </button>
-            <ul class="space-y-3 text-sm text-gray-300 mb-8">
+            <ul class="space-y-3 text-sm text-gray-300 mb-6">
                 <li class="flex items-start gap-3">
                     <div class="bg-infit-gold/20 p-1 rounded text-infit-gold"><i class="fas fa-check text-xs"></i></div>
                     <div>
@@ -537,6 +652,54 @@
                     </div>
                 </li>
             </ul>
+
+            <!-- SECCIÓN L-CARNITINA - Reto 3 Meses USA -->
+            <div id="lcarnitina-reto-section" class="lcarnitina-section border border-infit-gold/20 rounded-xl p-4 mb-6">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                        <span class="bg-gradient-to-r from-cyan-500/30 to-infit-gold/30 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase border border-cyan-500/30 text-cyan-300">Potencia Resultados</span>
+                        <span class="text-white text-sm font-bold">💊 L-Carnitina</span>
+                    </div>
+                    <input type="checkbox" id="lcarnitina-reto-toggle" class="lcarnitina-toggle" onchange="toggleLcarnitina('reto')">
+                </div>
+                <div id="lcarnitina-reto-details" class="hidden mt-3 space-y-2 animate-bounce-in">
+                    <div class="flex items-center gap-2 text-xs text-gray-400">
+                        <i class="fas fa-capsules text-infit-lcarnitina"></i>
+                        <span>3 Frascos (2 + 1 de regalo) - Presentación en pastillas</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs">
+                        <span class="lcarnitina-price-highlight font-bold text-lg">$<span id="lcarnitina-reto-price">90</span></span>
+                        <span class="text-gray-500">USD (envío incluido)</span>
+                    </div>
+                    <div class="bg-emerald-900/10 border border-emerald-500/10 p-2 rounded-lg">
+                        <div class="flex items-start gap-2 text-[10px] text-emerald-300/70">
+                            <i class="fas fa-gift mt-0.5"></i>
+                            <span><strong>¡1 frasco de regalo!</strong> En el Reto 3 Meses recibes 3 frascos por el mismo precio.</span>
+                        </div>
+                    </div>
+                    <div class="bg-cyan-900/10 border border-cyan-500/10 p-2 rounded-lg space-y-1">
+                        <div class="flex items-start gap-2 text-[10px] text-cyan-300/70">
+                            <i class="fas fa-truck mt-0.5"></i>
+                            <span>Envío incluido desde México hasta tu domicilio en USA.</span>
+                        </div>
+                        <div class="flex items-start gap-2 text-[10px] text-yellow-300/70">
+                            <i class="fas fa-bolt mt-0.5"></i>
+                            <span>La L-Carnitina potencia la quema de grasa y mejora tu rendimiento durante los 3 meses del reto.</span>
+                        </div>
+                    </div>
+                    <div class="prepay-alert p-2 rounded-lg mt-2">
+                        <div class="flex items-start gap-2 text-[10px] text-red-300/80">
+                            <i class="fas fa-exclamation-triangle mt-0.5"></i>
+                            <span><strong>Pago anticipado requerido</strong> para procesar el envío de la L-Carnitina desde México.</span>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-[9px] text-gray-600 mt-2 flex items-center gap-1">
+                    <i class="fas fa-info-circle text-infit-lcarnitina/50"></i>
+                    Complemento opcional. Solo se vende junto con un plan, la base es tu nutrición.
+                </p>
+            </div>
+
             <button onclick="selectPlan('Reto 3 Meses')" class="w-full btn-primary font-bold py-4 rounded-lg uppercase tracking-widest shadow-[0_0_20px_rgba(255,215,0,0.2)] active:scale-95 transition-transform">
                 ¡Iniciar Mi Reto!
             </button>
@@ -649,18 +812,60 @@
                     <div id="step-6" class="step-indicator w-2 h-2 rounded-full bg-gray-600"></div>
                 </div>
 
-                <div class="bg-white/5 p-3 rounded border border-white/10 mb-6 flex justify-between items-center">
+                <div class="bg-white/5 p-3 rounded border border-white/10 mb-4 flex justify-between items-center">
                     <div>
                         <p class="text-[10px] text-gray-400 uppercase font-bold">Plan Seleccionado</p>
                         <p id="modal-plan-name" class="text-white font-bold text-lg leading-none">Reto 3 Meses</p>
                     </div>
                     <div class="text-right">
-                        <p id="modal-plan-price" class="text-infit-gold font-bold text-xl">$99</p>
-                        <p class="text-[9px] text-gray-500 uppercase">USD - A pagar al recibir</p>
+                        <p id="modal-plan-price" class="text-infit-gold font-bold text-xl total-price-animated">$99</p>
+                        <p id="modal-plan-price-label" class="text-[9px] text-gray-500 uppercase">USD - A pagar al recibir</p>
                     </div>
                 </div>
 
-                <form id="client-form" onsubmit="handleOrder(event)" class="space-y-4 max-h-[70vh] overflow-y-auto pr-2 custom-scrollbar">
+                <!-- Resumen L-Carnitina en Modal -->
+                <div id="modal-lcarnitina-summary" class="hidden bg-cyan-900/15 border border-cyan-500/20 p-3 rounded-lg mb-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-capsules text-infit-lcarnitina"></i>
+                            <div>
+                                <p class="text-[10px] text-cyan-300 uppercase font-bold">+ L-Carnitina (Opcional)</p>
+                                <p id="modal-lcarnitina-desc" class="text-white text-xs font-bold">2 Frascos - Pastillas</p>
+                            </div>
+                        </div>
+                        <p id="modal-lcarnitina-price" class="text-infit-lcarnitina font-bold">$90</p>
+                    </div>
+                </div>
+
+                <!-- Precio Total en Modal -->
+                <div id="modal-total-row" class="hidden bg-gradient-to-r from-infit-gold/10 to-cyan-500/10 border border-white/10 p-3 rounded-lg mb-4">
+                    <div class="flex items-center justify-between">
+                        <p class="text-white font-bold text-sm uppercase">Total</p>
+                        <p id="modal-total-price" class="text-white font-bold text-2xl total-price-animated">$189</p>
+                    </div>
+                    <p id="modal-total-note" class="text-[9px] text-gray-500 mt-1 text-right">Plan + L-Carnitina (envío incluido)</p>
+                </div>
+
+                <!-- Alerta de pago anticipado cuando hay L-Carnitina -->
+                <div id="modal-prepay-alert" class="hidden prepay-alert p-3 rounded-lg mb-6">
+                    <div class="flex items-start gap-2">
+                        <i class="fas fa-exclamation-triangle text-red-400 mt-0.5"></i>
+                        <div>
+                            <p class="text-red-300 text-xs font-bold uppercase">Importante: Pago Anticipado</p>
+                            <p class="text-[10px] text-red-300/70 mt-1">La L-Carnitina se envía desde México. Es necesario realizar el <strong>pago anticipado de $<span id="modal-prepay-amount">90</span> USD</strong> para la L-Carnitina antes de procesar el envío. El plan de nutrición se paga al recibir tu material como siempre.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nota de pago al recibir (solo plan, sin L-Carnitina) -->
+                <div id="modal-payondelivery-note" class="bg-emerald-900/10 border border-emerald-500/10 p-3 rounded-lg mb-6">
+                    <div class="flex items-start gap-2">
+                        <i class="fas fa-shield-alt text-emerald-400 mt-0.5"></i>
+                        <p class="text-[10px] text-emerald-300/70"><strong class="text-emerald-300">Sin riesgo:</strong> Pagas hasta que recibas tu material completo. Confía en INFIT.</p>
+                    </div>
+                </div>
+
+                <form id="client-form" onsubmit="handleOrder(event)" class="space-y-4 max-h-[55vh] overflow-y-auto pr-2 custom-scrollbar">
                     <!-- PASO 1: Datos básicos -->
                     <div class="grid grid-cols-1 gap-4">
                         <div>
@@ -797,7 +1002,6 @@
                             ¿Hay algún alimento que no te guste o te haga daño? Marca las opciones que aplican:
                         </p>
                         
-                        <!-- Checkboxes de alergias/intolerancias comunes -->
                         <div class="grid grid-cols-2 gap-2">
                             <label class="exclude-item flex items-center gap-2 p-2 rounded border border-gray-700 cursor-pointer">
                                 <input type="checkbox" name="exclude" value="Lácteos" class="exclude-checkbox">
@@ -849,7 +1053,6 @@
                             </label>
                         </div>
 
-                        <!-- Campo de texto libre para otros alimentos -->
                         <div class="mt-4">
                             <label class="block text-[10px] text-gray-500 uppercase font-bold mb-1">
                                 <i class="fas fa-pen text-infit-gold mr-1"></i>Otros alimentos que desees excluir:
@@ -871,11 +1074,18 @@
                         <p class="text-white text-xs font-bold uppercase">
                             <i class="fas fa-wallet text-infit-gold mr-1"></i>¿Cómo prefieres enviar tu pago?
                         </p>
-                        <div class="bg-infit-gold/10 p-3 rounded-lg border border-infit-gold/20 mb-2">
+                        <div id="payment-info-plan" class="bg-infit-gold/10 p-3 rounded-lg border border-infit-gold/20 mb-2">
                             <p class="text-[10px] text-gray-300">
                                 <i class="fas fa-heart text-infit-gold mr-1"></i>
                                 <strong class="text-infit-gold">¡Envía tu pago como ya lo conoces!</strong><br>
                                 Así como envías dinero a tu familia en México, puedes enviar tu pago de la misma forma. Te daremos los datos cuando tu plan esté listo.
+                            </p>
+                        </div>
+                        <div id="payment-info-lcarnitina" class="hidden bg-red-900/10 p-3 rounded-lg border border-red-500/20 mb-2">
+                            <p class="text-[10px] text-gray-300">
+                                <i class="fas fa-exclamation-triangle text-red-400 mr-1"></i>
+                                <strong class="text-red-300">Pago anticipado para L-Carnitina:</strong><br>
+                                La L-Carnitina se envía desde México, por lo que requerimos pago anticipado para procesar tu envío. El plan de nutrición sigue siendo pagar al recibir.
                             </p>
                         </div>
                         <div class="grid grid-cols-2 gap-3">
@@ -957,7 +1167,7 @@
                             <i class="fab fa-whatsapp text-2xl"></i>
                             <span>Pedir Plan por WhatsApp</span>
                         </button>
-                        <p class="text-[10px] text-center text-gray-500 mt-2">
+                        <p id="modal-bottom-payment-note" class="text-[10px] text-center text-gray-500 mt-2">
                             <i class="fas fa-lock text-infit-gold"></i> Pagarás hasta que recibas tu material.
                         </p>
                     </div>
@@ -1013,12 +1223,66 @@
     </footer>
 
     <script>
+        // ==========================================
+        //  1. CONFIGURACIÓN EDITABLE
+        // ==========================================
         let config = {
-            promoText: "Promoción válida del 4 al 31 de mayo. Aprovecha el precio especial y los retos activos: reta a alguien que este contigo en EE. UU. para obtener descuento adicional o patrocina a alguien en México y comiencen juntos su mejor versión",
+            promoText: "Garantía Total: Paga hasta recibir tu plan. Precios especiales para nuestra comunidad en USA.",
             priceNutri: 39,
             priceReto: 99,
+            priceLcarnitina: 90,
             retoNote: "*Pagas hasta que te entreguemos todo tu material.*"
         };
+        // ==========================================
+
+        // ==========================================
+        //  2. ESTADO DE L-CARNITINA
+        // ==========================================
+        let lcarnitinaSelection = {
+            nutri: false,
+            reto: false
+        };
+
+        function toggleLcarnitina(plan) {
+            const toggle = document.getElementById(`lcarnitina-${plan}-toggle`);
+            const details = document.getElementById(`lcarnitina-${plan}-details`);
+            const section = document.getElementById(`lcarnitina-${plan}-section`);
+            
+            lcarnitinaSelection[plan] = toggle.checked;
+            
+            if (toggle.checked) {
+                details.classList.remove('hidden');
+                section.classList.add('lcarnitina-active');
+            } else {
+                details.classList.add('hidden');
+                section.classList.remove('lcarnitina-active');
+            }
+        }
+
+        function getLcarnitinaInfo(planName) {
+            if (planName === 'Nutrición Mensual') {
+                return {
+                    active: lcarnitinaSelection.nutri,
+                    frascos: 2,
+                    price: config.priceLcarnitina,
+                    label: '2 Frascos - Pastillas',
+                    giftNote: ''
+                };
+            } else if (planName === 'Reto 3 Meses') {
+                return {
+                    active: lcarnitinaSelection.reto,
+                    frascos: 3,
+                    price: config.priceLcarnitina,
+                    label: '3 Frascos (2 + 1 regalo) - Pastillas',
+                    giftNote: '¡1 frasco de regalo incluido!'
+                };
+            }
+            return { active: false, frascos: 0, price: 0, label: '', giftNote: '' };
+        }
+
+        // ==========================================
+        //  3. LÓGICA DE FIREBASE Y NEGOCIO
+        // ==========================================
         
         let db;
         let auth;
@@ -1074,7 +1338,6 @@
                 input.addEventListener('input', updateStepIndicators);
             });
             
-            // Actualizar pasos cuando se selecciona objetivo
             document.querySelectorAll('.goal-radio').forEach(radio => {
                 radio.addEventListener('change', () => {
                     const step2 = document.getElementById('step-2');
@@ -1085,7 +1348,6 @@
                 });
             });
             
-            // Actualizar pasos cuando se selecciona tienda
             document.querySelectorAll('.cuisine-radio').forEach(radio => {
                 radio.addEventListener('change', () => {
                     const step3 = document.getElementById('step-3');
@@ -1096,14 +1358,12 @@
                 });
             });
 
-            // Actualizar pasos cuando se marcan alimentos a excluir
             document.querySelectorAll('.exclude-checkbox').forEach(checkbox => {
                 checkbox.addEventListener('change', updateExcludeStep);
             });
 
             document.getElementById('exclude-other').addEventListener('input', updateExcludeStep);
 
-            // Actualizar pasos cuando se selecciona método de pago
             document.querySelectorAll('.payment-radio').forEach(radio => {
                 radio.addEventListener('change', () => {
                     const step5 = document.getElementById('step-5');
@@ -1172,16 +1432,24 @@
             document.getElementById('display-price-nutri').textContent = config.priceNutri;
             document.getElementById('display-price-reto').textContent = config.priceReto;
             document.getElementById('display-reto-note').textContent = config.retoNote;
+
+            // Actualizar precios de L-carnitina en las tarjetas
+            document.getElementById('lcarnitina-nutri-price').textContent = config.priceLcarnitina;
+            document.getElementById('lcarnitina-reto-price').textContent = config.priceLcarnitina;
+
+            // Cargar valores en el editor
             document.getElementById('edit-promo').value = config.promoText;
             document.getElementById('edit-price-nutri').value = config.priceNutri;
             document.getElementById('edit-price-reto').value = config.priceReto;
+            document.getElementById('edit-price-lcarnitina').value = config.priceLcarnitina;
             document.getElementById('edit-reto-note').value = config.retoNote;
         }
 
         function updateContent() {
             config.promoText = document.getElementById('edit-promo').value;
-            config.priceNutri = document.getElementById('edit-price-nutri').value;
-            config.priceReto = document.getElementById('edit-price-reto').value;
+            config.priceNutri = parseInt(document.getElementById('edit-price-nutri').value) || 0;
+            config.priceReto = parseInt(document.getElementById('edit-price-reto').value) || 0;
+            config.priceLcarnitina = parseInt(document.getElementById('edit-price-lcarnitina').value) || 90;
             config.retoNote = document.getElementById('edit-reto-note').value;
             loadConfig();
         }
@@ -1191,13 +1459,13 @@
         }
 
         function copyConfig() {
-            const code = `
-        let config = {
-            promoText: "${config.promoText}",
-            priceNutri: ${config.priceNutri},
-            priceReto: ${config.priceReto},
-            retoNote: "${config.retoNote.replace(/\n/g, '')}"
-        };`;
+            const code = `let config = {
+    promoText: "${config.promoText}",
+    priceNutri: ${config.priceNutri},
+    priceReto: ${config.priceReto},
+    priceLcarnitina: ${config.priceLcarnitina},
+    retoNote: "${config.retoNote.replace(/\n/g, '')}"
+};`;
             navigator.clipboard.writeText(code).then(() => {
                 alert("Código copiado al portapapeles.");
             });
@@ -1210,14 +1478,69 @@
             } else if (planName === 'Reto 3 Meses') {
                 price = config.priceReto;
             }
+
             selectedPlan = { name: planName, price: price };
             document.getElementById('modal-plan-name').textContent = planName;
-            document.getElementById('modal-plan-price').textContent = `$${price} USD`;
+            document.getElementById('modal-plan-price').textContent = `$${price}`;
+            
+            // Actualizar resumen de L-carnitina en el modal
+            const lcInfo = getLcarnitinaInfo(planName);
+            const lcSummary = document.getElementById('modal-lcarnitina-summary');
+            const totalRow = document.getElementById('modal-total-row');
+            const prepayAlert = document.getElementById('modal-prepay-alert');
+            const payOnDeliveryNote = document.getElementById('modal-payondelivery-note');
+            const paymentInfoPlan = document.getElementById('payment-info-plan');
+            const paymentInfoLcarnitina = document.getElementById('payment-info-lcarnitina');
+            const bottomPaymentNote = document.getElementById('modal-bottom-payment-note');
+            const planPriceLabel = document.getElementById('modal-plan-price-label');
+            
+            if (lcInfo.active) {
+                // Con L-Carnitina: mostrar resumen y total
+                lcSummary.classList.remove('hidden');
+                document.getElementById('modal-lcarnitina-desc').textContent = lcInfo.label;
+                document.getElementById('modal-lcarnitina-price').textContent = `$${lcInfo.price}`;
+                
+                totalRow.classList.remove('hidden');
+                const total = price + lcInfo.price;
+                document.getElementById('modal-total-price').textContent = `$${total}`;
+                document.getElementById('modal-total-note').textContent = `Plan + L-Carnitina (${lcInfo.frascos} frasco${lcInfo.frascos > 1 ? 's' : ''}) - envío incluido`;
+                
+                document.getElementById('modal-plan-price').textContent = `$${price}`;
+                planPriceLabel.textContent = 'USD - A pagar al recibir';
+                
+                // Mostrar alerta de pago anticipado
+                prepayAlert.classList.remove('hidden');
+                document.getElementById('modal-prepay-amount').textContent = lcInfo.price;
+                
+                // Ocultar nota de pago al recibir simple
+                payOnDeliveryNote.classList.add('hidden');
+                
+                // Actualizar info de método de pago
+                paymentInfoPlan.classList.add('hidden');
+                paymentInfoLcarnitina.classList.remove('hidden');
+                
+                // Actualizar nota del botón
+                bottomPaymentNote.innerHTML = '<i class="fas fa-exclamation-triangle text-red-400"></i> L-Carnitina requiere pago anticipado. Plan se paga al recibir.';
+                
+            } else {
+                // Sin L-Carnitina: solo el plan, pagar al recibir
+                lcSummary.classList.add('hidden');
+                totalRow.classList.add('hidden');
+                prepayAlert.classList.add('hidden');
+                payOnDeliveryNote.classList.remove('hidden');
+                
+                document.getElementById('modal-plan-price').textContent = `$${price}`;
+                planPriceLabel.textContent = 'USD - A pagar al recibir';
+                
+                paymentInfoPlan.classList.remove('hidden');
+                paymentInfoLcarnitina.classList.add('hidden');
+                
+                bottomPaymentNote.innerHTML = '<i class="fas fa-lock text-infit-gold"></i> Pagarás hasta que recibas tu material.';
+            }
             
             // Siempre mostrar campos de nutrición
             document.getElementById('fields-nutrition').classList.remove('hidden');
             
-            // Resetear indicadores de paso
             resetStepIndicators();
             
             const modal = document.getElementById('order-modal');
@@ -1233,7 +1556,6 @@
             }
             document.getElementById('step-1').classList.add('active');
             
-            // Limpiar selecciones
             document.querySelectorAll('.goal-radio').forEach(radio => radio.checked = false);
             document.querySelectorAll('.cuisine-radio').forEach(radio => radio.checked = false);
             document.querySelectorAll('.exclude-checkbox').forEach(checkbox => checkbox.checked = false);
@@ -1257,6 +1579,9 @@
             const referrerInput = document.getElementById('client-referrer').value;
             const finalReferrer = referrerInput || affiliateCode || 'Local/Orgánico';
             
+            const lcInfo = getLcarnitinaInfo(selectedPlan.name);
+            const totalPrice = selectedPlan.price + (lcInfo.active ? lcInfo.price : 0);
+            
             const formData = {
                 name: document.getElementById('client-name').value,
                 city: document.getElementById('client-city').value,
@@ -1274,21 +1599,30 @@
             let unitLabelW = 'lb';
             let unitLabelH = 'ft/in';
             
-            // Capturar el objetivo seleccionado
+            // L-Carnitina en el mensaje
+            if (lcInfo.active) {
+                formData.lcarnitina = true;
+                formData.lcarnitinaFrascos = lcInfo.frascos;
+                formData.lcarnitinaPrice = lcInfo.price;
+                formData.lcarnitinaPrepay = true;
+                
+                const giftText = lcInfo.giftNote ? ` (%0A• ${lcInfo.giftNote})` : '';
+                
+                detailsText += `%0A%0A💊 *L-CARNITINA (Opcional)*%0A• ${lcInfo.frascos} Frasco${lcInfo.frascos > 1 ? 's' : ''} - Presentación en pastillas%0A• Costo: $${lcInfo.price} USD (envío incluido desde México)${giftText}%0A• ⚠️ *Requiere pago anticipado* de $${lcInfo.price} USD para procesar envío%0A• Total: *$${totalPrice} USD* (Plan: pagar al recibir / L-Carnitina: pago anticipado)`;
+            }
+            
             const selectedGoal = document.querySelector('input[name="goal"]:checked');
             if (selectedGoal) {
                 formData.goal = selectedGoal.value;
                 detailsText += `%0A%0A🎯 *OBJETIVO*%0A• ${formData.goal}`;
             }
             
-            // Capturar dónde hace mandado
             const selectedCuisine = document.querySelector('input[name="cuisine"]:checked');
             if (selectedCuisine) {
                 formData.cuisine = selectedCuisine.value;
                 detailsText += `%0A%0A🛒 *DÓNDE HAGO MANDADO*%0A• ${formData.cuisine}`;
             }
             
-            // Capturar alimentos a excluir
             const excludedItems = [];
             document.querySelectorAll('.exclude-checkbox:checked').forEach(checkbox => {
                 excludedItems.push(checkbox.value);
@@ -1311,14 +1645,12 @@
                 }
             }
             
-            // Capturar método de pago
             const selectedPayment = document.querySelector('input[name="payment"]:checked');
             if (selectedPayment) {
                 formData.paymentMethod = selectedPayment.value;
                 detailsText += `%0A%0A💳 *MÉTODO DE PAGO*%0A• ${formData.paymentMethod}`;
             }
             
-            // Siempre incluir datos nutricionales
             formData.age = document.getElementById('client-age').value;
             formData.weight = document.getElementById('client-weight').value;
             formData.height = document.getElementById('client-height').value;
@@ -1339,9 +1671,25 @@
             const locationText = formData.origin !== 'No especificado' 
                 ? `de Santa Ana Hueytlalpan, ahora en ${formData.city}` 
                 : `de ${formData.city}`;
-            const header = `Hola INFIT! 🇺🇸 Soy *${formData.name}* (${locationText}).%0A%0A✨ Me interesa el *${formData.plan}* (Precio: $${formData.price} USD).`;
+            
+            let header;
+            const planPriceLabel = selectedPlan.name === 'Reto 3 Meses' ? ' Total' : '/ Mes';
+            
+            if (lcInfo.active) {
+                header = `Hola INFIT! 🇺🇸 Soy *${formData.name}* (${locationText}).%0A%0A✨ Me interesa el *${selectedPlan.name}* ($${selectedPlan.price} USD${planPriceLabel}) + *L-Carnitina ${lcInfo.frascos} frasco${lcInfo.frascos > 1 ? 's' : ''}* ($${lcInfo.price} USD, envío incluido).%0A💰 *Total: $${totalPrice} USD*`;
+            } else {
+                header = `Hola INFIT! 🇺🇸 Soy *${formData.name}* (${locationText}).%0A%0A✨ Me interesa el *${selectedPlan.name}* (Precio: $${selectedPlan.price} USD${planPriceLabel}).`;
+            }
+            
             const refText = finalReferrer !== 'Local/Orgánico' ? `%0A%0A🤝 *Vengo recomendado por:* ${finalReferrer}` : '';
-            const paymentCondition = `%0A%0A✅ *Confirmación:* Estoy enterado que realizaré mi pago hasta que reciba mi material completo.`;
+            
+            let paymentCondition;
+            if (lcInfo.active) {
+                paymentCondition = `%0A%0A✅ *Confirmación de pago:*%0A• Plan de nutrición: Pago al recibir mi material completo%0A• L-Carnitina: Pago anticipado de $${lcInfo.price} USD para procesar envío desde México`;
+            } else {
+                paymentCondition = `%0A%0A✅ *Confirmación:* Estoy enterado que realizaré mi pago hasta que reciba mi material completo.`;
+            }
+            
             const motivation = `%0A%0A✨ *¡Listo para mi mejor Versión!*`;
             const fullText = `${header}${detailsText}${refText}${paymentCondition}${motivation}`;
             const waLink = `https://wa.me/${phone}?text=${fullText}`;
